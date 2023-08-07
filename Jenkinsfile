@@ -9,8 +9,11 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        app = docker.build("chienphung/petclinic-spinnaker-jenkins")
-      }
+                echo '=== Building Petclinic Docker Image ==='
+                script {
+                    app = docker.build("chienphung/petclinic-spinnaker-jenkins")
+                }
+            }
     }
   }
 }

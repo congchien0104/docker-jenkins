@@ -9,23 +9,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'docker build -t chienphung/jenkins-docker-hub .'
+        app = docker.build("chienphung/petclinic-spinnaker-jenkins")
       }
     }
-    stage('Login') {
-      steps {
-        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-      }
-    }
-    stage('Push') {
-      steps {
-        sh 'docker push chienphung/jenkins-docker-hub'
-      }
-    }
-  }
-  post {
-    always {
-      sh 'docker logout'
-    }
-  }
 }

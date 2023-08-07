@@ -12,4 +12,5 @@ pipeline {
         app = docker.build("chienphung/petclinic-spinnaker-jenkins")
       }
     }
+  }
 }

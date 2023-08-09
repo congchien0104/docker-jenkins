@@ -11,7 +11,7 @@ pipeline {
     stage('Logging into AWS ECR') {
       steps {
         script {
-        sh "docker login -u AWS -p $(aws ecr get-login-password --region the-region-you-are-in) 893473272543.dkr.ecr.the-region-you-are-in.amazonaws.com"
+        sh """aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"""
         }  
       }
     }
@@ -23,7 +23,7 @@ pipeline {
         }
       }
     }
-   
+
     // Uploading Docker images into AWS ECR
     stage('Pushing to ECR') {
      steps{  

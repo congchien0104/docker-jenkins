@@ -1,31 +1,37 @@
 pipeline {
   agent any
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
-  }
   environment {
-    DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+        AWS_ACCOUNT_ID="893473272543"
+        AWS_DEFAULT_REGION="us-east-1"
+        IMAGE_REPO_NAME="practical-devops"
+        IMAGE_TAG="v1"
+        REPOSITORY_URI = "893473272543.dkr.ecr.us-east-1.amazonaws.com"
   }
   stages {
-    stage('Build') {
+    stage('Logging into AWS ECR') {
       steps {
-        sh 'docker build -t chienphung/jenkins-docker-hub .'
+        script {
+        sh """aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"""
+        }  
       }
     }
-    stage('Login') {
-      steps {
-        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+    // Building Docker images
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+        }
       }
     }
-    stage('Push') {
-      steps {
-        sh 'docker push chienphung/jenkins-docker-hub'
+   
+    // Uploading Docker images into AWS ECR
+    stage('Pushing to ECR') {
+     steps{  
+         script {
+                sh """docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"""
+                sh """docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"""
+         }
+        }
       }
-    }
-  }
-  post {
-    always {
-      sh 'docker logout'
-    }
   }
 }
